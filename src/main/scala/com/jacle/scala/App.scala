@@ -92,6 +92,12 @@ object App {
     println(beginMonth)
     println(lastMonth)
 
+    var some1=Some((1,2))
+    println(some1.get._1)
+
+    var lista=List('a','b','c','d','e')
+    println(lista take 20);
+
   }
 
 }
