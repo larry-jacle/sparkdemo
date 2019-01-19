@@ -98,6 +98,17 @@ object App {
     var lista=List('a','b','c','d','e')
     println(lista take 20);
 
+    for(i<-Range(0,lista.length,2))
+      {
+        println("current step is:"+lista(i));
+      }
+
+    for(i<-0.to(lista.length,2))
+      {
+        println(lista(i));
+      }
+
+
   }
 
 }
