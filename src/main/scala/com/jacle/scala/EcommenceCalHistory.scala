@@ -3,14 +3,22 @@ package com.jacle.scala
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.joda.time.DateTime
-import scala.math.BigDecimal
+import org.joda.time.format.DateTimeFormat
 import scala.collection.mutable.ListBuffer
+import scala.math.BigDecimal
 
 /**
   * 电商详情计算
   */
-object EcommenceCal {
+object EcommenceCalHistory {
   def main(args: Array[String]): Unit = {
+
+    if(args.length==0)
+    {
+      println("请输入参数，当前月份，例如输入:201901,计算的是201812月份的数据");
+      return ;
+    }
+
     val conf = new SparkConf().setAppName("spark-ecnomic");
     //本机测试是打开，服务器上关闭此选项
     //    conf.setMaster("local");
@@ -20,8 +28,11 @@ object EcommenceCal {
     //    val sourceRdd = sc.textFile("hdfs://m151:8020/data/tyc/usrORGDSSJPPXQB/part-m-00009");
     val sourceRdd = sc.textFile("hdfs://m151:8020/data/tyc/usrORGDSSJPPXQB");
 
+
+
     //计算当前的月份，获取上个月的月份，日期格式为YYYYMM
-    var jodatime: DateTime = new DateTime();
+    var format=DateTimeFormat.forPattern("YYYYMM")
+    var jodatime: DateTime = DateTime.parse(args(0),format);
     var lastMonth: Int = jodatime.minusMonths(1).toString("YYYYMM").toInt;
     var lastTwoMonth: Int = jodatime.minusMonths(2).toString("YYYYMM").toInt;
 

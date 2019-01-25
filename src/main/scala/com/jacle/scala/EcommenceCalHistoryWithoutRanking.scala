@@ -3,14 +3,23 @@ package com.jacle.scala
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.joda.time.DateTime
-import scala.math.BigDecimal
+import org.joda.time.format.DateTimeFormat
+
 import scala.collection.mutable.ListBuffer
+import scala.math.BigDecimal
 
 /**
   * 电商详情计算
   */
-object EcommenceCal {
+object EcommenceCalHistoryWithoutRanking {
   def main(args: Array[String]): Unit = {
+
+    if(args.length==0)
+    {
+      println("请输入参数，当前月份，例如输入:201901,计算的是201812月份的数据");
+      return ;
+    }
+
     val conf = new SparkConf().setAppName("spark-ecnomic");
     //本机测试是打开，服务器上关闭此选项
     //    conf.setMaster("local");
@@ -20,8 +29,11 @@ object EcommenceCal {
     //    val sourceRdd = sc.textFile("hdfs://m151:8020/data/tyc/usrORGDSSJPPXQB/part-m-00009");
     val sourceRdd = sc.textFile("hdfs://m151:8020/data/tyc/usrORGDSSJPPXQB");
 
+
+
     //计算当前的月份，获取上个月的月份，日期格式为YYYYMM
-    var jodatime: DateTime = new DateTime();
+    var format=DateTimeFormat.forPattern("YYYYMM")
+    var jodatime: DateTime = DateTime.parse(args(0),format);
     var lastMonth: Int = jodatime.minusMonths(1).toString("YYYYMM").toInt;
     var lastTwoMonth: Int = jodatime.minusMonths(2).toString("YYYYMM").toInt;
 
@@ -45,10 +57,10 @@ object EcommenceCal {
       ((arr(0), arr(1)), (arr(2), x._2))
     })
     //3、计算排名
-    var lastMonthRaningRdd = sc.textFile("hdfs://m151:8020/data/tyc/lastRanking_" + lastTwoMonth).map(x => {
+ /*   var lastMonthRaningRdd = sc.textFile("hdfs://m151:8020/data/tyc/lastRanking_" + lastTwoMonth).map(x => {
       var arr = x.split("\001");
       ((arr(1), arr(2), arr(3)), arr(4))
-    });
+    });*/
     var rankingRdd = rdd3.groupByKey().map(x => {
       var m1 = x._2.toList.sortBy(n => n._2)(Ordering.BigDecimal.reverse)
       (x._1, m1)
@@ -74,13 +86,9 @@ object EcommenceCal {
       rankingListBuffer.toList
     });
 
-    var rankingMapRdd = rankingRdd.leftOuterJoin(lastMonthRaningRdd).map(x => {
-      var lastTimeRanking = x._2._2.getOrElse("None");
+    var rankingMapRdd = rankingRdd.map(x => {
       var rankingStep = 0;
-      if (lastTimeRanking != "None") {
-        rankingStep = lastTimeRanking.toInt - x._2._1._2;
-      }
-      (x._1, (x._2._1._1, x._2._1._2, rankingStep))
+      (x._1, (x._2._1, x._2._2, 0))
     })
 
     //4、计算标记点(两类标记点：销量和销售额)
