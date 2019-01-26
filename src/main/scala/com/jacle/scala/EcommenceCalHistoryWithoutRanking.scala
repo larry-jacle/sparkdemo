@@ -22,11 +22,11 @@ object EcommenceCalHistoryWithoutRanking {
 
     val conf = new SparkConf().setAppName("spark-ecnomic");
     //本机测试是打开，服务器上关闭此选项
-    //    conf.setMaster("local");
+//        conf.setMaster("local");
 
     //contetxt操作对象
     val sc = new SparkContext(conf);
-    //    val sourceRdd = sc.textFile("hdfs://m151:8020/data/tyc/usrORGDSSJPPXQB/part-m-00009");
+//    val sourceRdd = sc.textFile("hdfs://m151:8020/data/tyc/usrORGDSSJPPXQB/part-m-00001");
     val sourceRdd = sc.textFile("hdfs://m151:8020/data/tyc/usrORGDSSJPPXQB");
 
 
@@ -48,14 +48,27 @@ object EcommenceCalHistoryWithoutRanking {
       (rowArr(0), rowArr(2), rowArr(3), rowArr(5), rowArr(6), rowArr(7), rowArr(8));
     });
 
+    //上个月份有销量的品牌，求排名的时候，第一个条件是品牌一定要在12月份有销量
+    var rddHasMonthAmount=rdd1.filter(x=>x._4.toInt==lastMonth).map(x=>((x._2,x._3,x._5),(x._1,x._4,x._6,x._7)));
+
     //1、过滤指定日期之外的数据
-    rdd1 = rdd1.filter(x => Integer.parseInt(x._4) >= beginMonth && Integer.parseInt(x._4) <= lastMonth);
+    rdd1 = rdd1.filter(x => Integer.parseInt(x._4) >= beginMonth && Integer.parseInt(x._4) <= lastMonth).filter(x=>x._2.toInt==1);
+
+
     //2、计算总销量
     var rdd2: RDD[(String, BigDecimal)] = rdd1.map(x => (x._2 + "," + x._3 + "," + x._5, BigDecimal(x._7))).reduceByKey(_ + _);
     var rdd3 = rdd2.map(x => {
       var arr = x._1.split(",");
       ((arr(0), arr(1)), (arr(2), x._2))
     })
+
+    //2.2过滤sourceRdd，品牌id来过滤，经一年销售额最大的
+    rdd3=rdd3.map(x=>(x._2._1,(x._1._1,x._1._2,x._2._2))).groupByKey().map(x=>{
+      var m1 = x._2.toList.sortBy(n => n._3)(Ordering.BigDecimal.reverse).head
+      ((m1._1,m1._2),(x._1,m1._3))
+    })
+
+    rdd3=rdd3.map(x=>((x._1._1,x._1._2,x._2._1),x._2._2)).join(rddHasMonthAmount).map(x=>((x._1._1,x._1._2),(x._1._3,x._2._1)));
     //3、计算排名
  /*   var lastMonthRaningRdd = sc.textFile("hdfs://m151:8020/data/tyc/lastRanking_" + lastTwoMonth).map(x => {
       var arr = x.split("\001");
@@ -170,6 +183,7 @@ object EcommenceCalHistoryWithoutRanking {
 //    outputRdd.foreach(println);
         outputRdd.saveAsTextFile("hdfs://m151:8020/data/tyc/guoyuxiang_calEcnomic");
     //    xseRdd.map(x=>(x._1,x._2.toList.sortBy(_._1))).foreach(println)
+
     sc.stop();
 
   }
