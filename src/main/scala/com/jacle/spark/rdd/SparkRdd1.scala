@@ -7,7 +7,7 @@ object SparkRdd1 {
     //创建Rdd的方法
     var conf=new SparkConf().setAppName("makeRdd");
     //driver部署是默认的是1
-//    conf.set("spark.default.parallelism","50");
+    conf.set("spark.default.parallelism","50");
 //    conf.set("spark.executor.cores","5")
 //    conf.set("spark.cores.max","25")
 //    conf.setMaster("local[*]");
@@ -29,10 +29,14 @@ object SparkRdd1 {
 
     //大量的shuffle也会是的task数量增加
     //parallelize中的partition数量优先级sc.parallelize(List(1,2,3,4,5,6,7),3)> conf.set("spark.default.parallelism","2") > conf.setMaster("local")
-
-/*    val rdd_para = sc.parallelize(List(1, 2, 3, 23))
+    var data=List(1, 2, 3, 23,2,3,3,19,3);
+//    data.par
+    val rdd_para = sc.parallelize(List(1, 2, 3, 23,2,3,3,19,3))
     rdd_para.foreach(println)
-    println(rdd_para.getNumPartitions)*/
+    println(rdd_para.getNumPartitions)
+    //统计各个值出现的次数
+    println(rdd_para.countByValue())
+    println(rdd_para.collect())
 
     //读取Hdfs文件的时候默认的是1,只有最小分区数大于实际分区数才有效
     //根据平均区分数来计算block的大小
@@ -40,10 +44,9 @@ object SparkRdd1 {
 
     //如果不设置spark.default.parallelism，使用的是hdfs的Block数
 //    println(sourceRdd.getNumPartitions)
-    sc.textFile("file://m151:8020/data/tyc/usrORGDSSJPPXQB")
-    println(sc.defaultMinPartitions)
-    println(sc.defaultParallelism)
-
+//    var rdd=sc.textFile("hdfs://m151:8020/data/tyc/usrORGDSSJPPXQB")
+//    var rdd2=rdd.flatMap(x=>{x.split("\001")});
+//    println(rdd2.count);
 
   }
 }
