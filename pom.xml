@@ -23,6 +23,7 @@
     <spark.version>1.6.2</spark.version>
     <hadoop.version>2.6.5</hadoop.version>
     <scala.compat.version>2.10</scala.compat.version>
+    <package.dir>${project.build.directory}/jars_package</package.dir>
   </properties>
 
   <dependencies>
@@ -104,6 +105,12 @@
       <version>2.9.9</version>
     </dependency>
 
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.19</version>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -152,6 +159,28 @@
             <include>**/*Suite.*</include>
           </includes>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <mkdir dir="${package.dir}"/>
+                <copy todir="${package.dir}" overwrite="true" >
+                  <fileset dir="${project.build.directory}" erroronmissingdir="false">
+                    <include name="*.jar"/>
+                  </fileset>
+                </copy>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

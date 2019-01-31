@@ -7,6 +7,7 @@ import org.joda.time.DateTime
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.util.parsing.json.JSON
 
 
 /**
@@ -107,6 +108,10 @@ object App {
       {
         println(lista(i));
       }
+
+    //JSON转换的时候一定要是标准的json，内部使用双引号
+    var jsonStr="{\"name\":\"jacle\",\"age\":23}";
+    println(JSON.parseFull(jsonStr));
 
 
   }
