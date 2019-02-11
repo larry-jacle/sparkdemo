@@ -118,11 +118,20 @@ object App {
 
     //flatMap返回的值跟主类型一致
     val xs2 = Map("a" -> List(11,111,22), "b" -> List(22,222,2222)).flatMap(x=>{println(x);x._2})
-    println(xs2)
+    println("1L",xs2)
 
     //flatmap输出的一定是一个List，将各个list进行合并
+    //flatMap返回的的类型跟输入样
     val ys = Map("a" -> List(1 -> 11,1 -> 111), "b" -> List(2 -> 22,2 -> 222)).flatMap(x=>{println(x._2);x._2})
-    println(ys.mkString(","))
+    println("2L",ys)
+
+    //1->11可以理解一个key-value的tuple
+    var listMap=Map(1 -> 11,1 -> 111)++Map(2 -> 11,2 -> 111);
+    println(listMap);
+
+    var m1=1->11;
+    println(m1);
+
 
   }
 
