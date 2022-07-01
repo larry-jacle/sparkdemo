@@ -22,7 +22,7 @@
         <scala.version>2.10</scala.version>
         <scala.detail.version>2.10.5</scala.detail.version>
         <spark.version>1.6.2</spark.version>
-        <hadoop.version>2.6.5</hadoop.version>
+        <hadoop.version>2.7.0</hadoop.version>
         <scala.compat.version>2.10</scala.compat.version>
         <package.dir>${project.build.directory}/jars_package</package.dir>
     </properties>
